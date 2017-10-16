@@ -1,4 +1,4 @@
-package org.javaconmanzanas.examples.budget.repository;
+package org.javaconmanzanas.examples.budget.model;
 
 import java.math.BigDecimal;
 

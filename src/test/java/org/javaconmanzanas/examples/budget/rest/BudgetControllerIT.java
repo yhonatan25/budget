@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BudgetControllerIT {
 
     private static final String BUDGET_NAME = "November 2017";
+    public static final long BUDGET_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -34,7 +36,7 @@ public class BudgetControllerIT {
                 .accept(APPLICATION_JSON)
                 .content(budgetString))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.id").value(BUDGET_ID))
                 .andExpect(jsonPath("$.name").value(BUDGET_NAME));
     }
 
@@ -46,7 +48,7 @@ public class BudgetControllerIT {
                 .accept(APPLICATION_JSON)
                 .content(budgetString))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.id").value(BUDGET_ID))
                 .andExpect(jsonPath("$.name").value(BUDGET_NAME));
 
         mockMvc.perform(post("/budgets")
@@ -74,5 +76,30 @@ public class BudgetControllerIT {
                 .accept(APPLICATION_JSON)
                 .content(budgetString))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testGetBudget() throws Exception {
+        final String budgetString = "{\"name\":\"November 2017\"}";
+        mockMvc.perform(post("/budgets")
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
+                .content(budgetString))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(BUDGET_ID))
+                .andExpect(jsonPath("$.name").value(BUDGET_NAME));
+
+        mockMvc.perform(get("/budgets/{budgetId}", BUDGET_ID)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(BUDGET_ID))
+                .andExpect(jsonPath("$.name").value(BUDGET_NAME));
+    }
+
+    @Test
+    public void testGetBudgetNotFound() throws Exception {
+        mockMvc.perform(get("/budgets/{budgetId}", BUDGET_ID)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
